@@ -179,34 +179,34 @@ myLayoutHook =
 
 -- Manage Hook {{{
 myManageHook =
-  composeAll . concat $
-  [ [ className =? c --> doShift (w !! 1) | c <- inetApp ]
-  , [ className =? c --> doShift (w !! 2) | c <- devApp ]
-  , [ className =? c --> doShift (w !! 3) | c <- entApp ]
-  , [ className =? c --> doShift (w !! 4) | c <- playApp ]
-  , [ className =? c --> doShift (w !! 5) | c <- prodApp ]
-  , [ className =? c --> doFloat          | c <- floatingApp ]
-  , [ className =? c --> doIgnore         | c <- ignoreApp ]
-  , [ isDialog       --> doCenterFloat ]
-  , [ isRole         --> doCenterFloat ]
-  , [ manageDocks ]
-  , [ manageHook def ]
-  ]
-  where
-    w = workspaces'
-    isRole = stringProperty "WM_WINDOW_ROLE" =? "pop-up"
-    inetApp = ["Chromium", "Firefox"]
-    devApp =
-      [ "SecureCRT", "GNS3", "VirtualBox Manager"
-      , "VirtualBox Machine", "jetbrains-studio"
-      , "Code", "oni"
-      ]
-    entApp = ["MPlayer", "smplayer", "mpv", "Gimp"]
-    playApp = ["player", "Genymotion Player"]
-    prodApp = ["MuPDF"]
-    floatingApp = ["SecureCRT", "TeamViewer", "Xmessage"]
-    ignoreApp = ["desktop", "desktop_window", "stalonetray", "trayer"]
--- }}}
+    composeAll . concat $
+    [ [ className =? c --> doShift (w !! 1) | c <- inetApp ]
+    , [ className =? c --> doShift (w !! 2) | c <- devApp ]
+    , [ className =? c --> doShift (w !! 3) | c <- entApp ]
+    , [ className =? c --> doShift (w !! 4) | c <- playApp ]
+    , [ className =? c --> doShift (w !! 5) | c <- prodApp ]
+    , [ className =? c --> doFloat          | c <- floatingApp ]
+    , [ className =? c --> doIgnore         | c <- ignoreApp ]
+    , [ isDialog       --> doCenterFloat ]
+    , [ isRole         --> doCenterFloat ]
+    , [ manageDocks ]
+    , [ manageHook def ]
+    ]
+    where
+      w = workspaces'
+      isRole = stringProperty "WM_WINDOW_ROLE" =? "pop-up"
+      inetApp = ["Chromium", "Firefox"]
+      devApp =
+        [ "SecureCRT", "GNS3", "VirtualBox Manager"
+        , "VirtualBox Machine", "jetbrains-studio"
+        , "Code", "oni"
+        ]
+      entApp = ["MPlayer", "smplayer", "mpv", "Gimp"]
+      playApp = ["player", "Genymotion Player"]
+      prodApp = ["MuPDF"]
+      floatingApp = ["SecureCRT", "TeamViewer", "Xmessage"]
+      ignoreApp = ["desktop", "desktop_window", "stalonetray", "trayer"]
+  -- }}}
 
 -- Scratchpad {{{
 manageScratchPad :: ManageHook
@@ -221,15 +221,15 @@ manageScratchPad = scratchpadManageHook (W.RationalRect l t w h)
 -- Startup Hook {{{
 myStartupHook = do
   spawnOnce "feh --bg-fill $HOME/.xmonad/background.png"
-  spawnOnce "xsetroot -cursor_name left_ptr"
-  spawnOnce "sleep 1.0 && setxkbmap -option 'caps:swapescape'"
-  spawnOnce "sleep 1.1 && setxkbmap -option 'altwin:swap_lalt_lwin'; "
-  spawnOnce "sleep 1.5 && xmodmap $HOME/.Xmodmap"
   spawnOnce "compton --config /dev/null -bGC \
             \ --focus-exclude \"class_g = 'Dmenu'\" \
             \ --inactive-dim 0.2 "
-  spawnOnce "setxkbmap -layout us,ru -variant -option grp:alt_shift_toggle,grp_led:scroll"
+  spawnOnce "sleep 1.0 && setxkbmap -option"
+  spawnOnce "sleep 1.0 && setxkbmap -option 'caps:swapescape'"
+  spawnOnce "sleep 1.0 && setxkbmap -layout us,ru -variant -option grp:alt_shift_toggle,grp_led:scroll"
   spawnOnce "xclip"
+  spawnOnce "terminator"
+  spawnOnce "firefox"
 -- }}}
 
 
@@ -244,12 +244,11 @@ myKeys =
   , ((m, xK_grave), toggleWS)
   , ((m, xK_minus), scratchPad)
   , ((m, xK_f), sendMessage $ Toggle FULL)
-  , ((0, xF86XK_AudioLowerVolume), spawn "ponymix decrease 10")
-  , ((0, xF86XK_AudioRaiseVolume), spawn "ponymix increase 10")
-  , ((0, xF86XK_AudioMute), spawn "ponymix toggle")
-  , ((0, xF86XK_MonBrightnessDown), spawn "xbacklight -5")
-  , ((0, xF86XK_MonBrightnessUp), spawn "xbacklight +5")
-  , ((0, xK_Print), spawn "maim -s | xclip -selection clipboard -t image/png")
+  , ((0, xF86XK_AudioLowerVolume), spawn "amixer -D pulse sset Master 5%-")
+  , ((0, xF86XK_AudioRaiseVolume), spawn "amixer -D pulse sset Master 5%+")
+  , ((0, xF86XK_MonBrightnessDown), spawn "light -U 10")
+  , ((0, xF86XK_MonBrightnessUp), spawn "light -A 10")
+  , ((0, xK_Print), spawn "gnome-screenshot")
   , ((s, xK_Print), spawn "maim | xclip -selection clipboard -t image/png")
   ]
   where
@@ -259,17 +258,11 @@ myKeys =
     dmenu =
       "dmenu_run -i \
       \ -fn '" ++ fn ++ "' \
-      \ -w '" ++ w ++ "' \
-      \ -h '" ++ h ++ "' \
-      \ -x '" ++ x ++ "' \
       \ -nf '" ++ fgColor ++ "' \
       \ -sf '" ++ fgColor ++ "' \
       \ -nb '" ++ bgColor ++ "' \
       \ -sb '" ++ layoutColor ++ "'"
       where
-        w = monitor 0.3
-        x = show(monitor'(0.7) - 70)
-        h = "26"
-        fn = font
+        fn = "Misc Termsyn.Icons:size=18"
     scratchPad = scratchpadSpawnActionTerminal term
 -- }}}
